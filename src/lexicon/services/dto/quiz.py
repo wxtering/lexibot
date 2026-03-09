@@ -11,7 +11,8 @@ class QuizState(Enum):
 
 @dataclass
 class QuizDTO:
-    state: QuizState | None
-    word: str | None
+    state: QuizState
+    word: str
     opened_letters: str
     attempts: int
+    definition: str

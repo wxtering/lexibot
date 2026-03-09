@@ -4,10 +4,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from dishka.integrations.aiogram import FromDishka
 
+from src.lexicon.services.dto.quiz import QuizState
 from src.lexicon.services.logic.games.quiz import QuizService
 from src.lexicon.services.logic.user import UserService
 from src.lexicon.tg_bot.middlewares.chat import GroupChatMiddleware
-from src.lexicon.tg_bot.states.quiz import QuizState
+from src.lexicon.tg_bot.states.quiz import QuizStates
 
 router = Router()
 router.message.middleware(GroupChatMiddleware())
@@ -21,7 +22,7 @@ async def quiz_start(
     QuizService: FromDishka[QuizService],
     UserService: FromDishka[UserService],
 ):
-    await state.set_state(QuizState.ingame)
+    await state.set_state(QuizStates.ingame)
     game_session = await QuizService.start_quiz(
         chat_id=message.chat.id, user_id=message.from_user.id
     )
@@ -31,15 +32,15 @@ async def quiz_start(
     await message.answer(
         text=(
             f"📖 Новый вопрос!\n\n"
-            f"{game_session['definition']}\n\n"
-            f"🔤 Слово из {game_session['wordlen']} букв\n"
+            f"{game_session.definition}\n\n"
+            f"🔤 Слово из {len(game_session.word)} букв\n"
             f"💡 Напишите ответ в формате: 'слово'\n"
             f"🔍 Подсказка: напишите hint"
         ),
     )
 
 
-@router.message(QuizState.ingame, Command("quit"))
+@router.message(QuizStates.ingame, Command("quit"))
 async def quit(
     message: Message, state: FSMContext, QuizService: FromDishka[QuizService]
 ):
@@ -48,7 +49,7 @@ async def quit(
     await message.answer(text="🛑 Игра завершена. До встречи!")
 
 
-@router.message(QuizState.ingame, F.text.startswith("hint"))
+@router.message(QuizStates.ingame, F.text.startswith("hint"))
 async def get_hint(
     message: Message, state: FSMContext, QuizService: FromDishka[QuizService]
 ):
@@ -58,7 +59,7 @@ async def get_hint(
     )
 
 
-@router.message(QuizState.ingame)
+@router.message(QuizStates.ingame)
 async def quiz_answer(
     message: Message,
     state: FSMContext,
@@ -69,21 +70,21 @@ async def quiz_answer(
     result = await QuizService.check_state(
         user_attempt=answer, chat_id=message.chat.id, user_id=message.from_user.id
     )
-    if result["state"] == "continue":
+    if result.state == QuizState.continue_:
         pass
-    elif result["state"] == "win":
+    elif result.state == QuizState.win:
         await UserService.add_user(
             username=message.from_user.username, user_id=message.from_user.id
         )
         await message.answer(
-            text=f"✅ Правильно!\n\nСлово: {result['word']}",
+            text=f"✅ Правильно!\n\nСлово: {result.word}",
         )
 
-    elif result["state"] == "hint":
+    elif result.state == QuizState.hint:
         await message.answer(
-            text=f"🔍 Подсказка:\n{result['hint_letters']}",
+            text=f"🔍 Подсказка:\n{result.opened_letters}",
         )
-    elif result["state"] == "lose":
+    elif result.state == QuizState.lose:
         await message.answer(
-            text=f"❌ Вы проиграли!, слово было: {result['word']}",
+            text=f"❌ Вы проиграли!, слово было: {result.word}",
         )
