@@ -1,9 +1,7 @@
 import logging
-from re import finditer
-
-from aiogram.types import game
 
 from src.lexicon.database.models.models import GameHistory, GameSessions
+from src.lexicon.services.dto.hangman import HangmanDTO, HangmanState
 from src.lexicon.services.entity.exceptions import GameLogicError, GameNotFound
 from src.lexicon.services.entity.uow import UnitOfWork
 
@@ -79,25 +77,20 @@ def get_hangman_pic(attempt: int) -> str:
     return HANGMAN_PICS[attempt]
 
 
-def game_logic(session_info: dict, user_attempt: str) -> dict:
+def game_logic(session_info: dict, user_attempt: str) -> HangmanDTO:
     word = session_info.get("word", "")
     attempt = session_info.get("attempt", 0)
     opened_letters = session_info.get("opened_letters", "")
     user_attempt = user_attempt.lower()
-    result = {
-        "state": "",
-        "pic": "",
-        "opened_letters": opened_letters,
-        "word": word,
-        "attempt": attempt,
-    }
 
-    # if letter
     if len(user_attempt) == 1:
         if user_attempt in opened_letters:
-            result["state"] = "already_opened"
-            result["pic"] = get_hangman_pic(attempt)
-            return result
+            return HangmanDTO(
+                state=HangmanState.already_opened,
+                word=None,
+                opened_letters=opened_letters,
+                attempts=attempt,
+            )
         if user_attempt in word:
             opened_list = list(opened_letters)
             for i, char in enumerate(word):
@@ -105,49 +98,61 @@ def game_logic(session_info: dict, user_attempt: str) -> dict:
                     opened_list[i] = user_attempt
 
             new_opened_letters = "".join(opened_list)
-            result["opened_letters"] = new_opened_letters
-            result["pic"] = get_hangman_pic(attempt)
 
             if new_opened_letters == word:
-                result["state"] = "win"
-            else:
-                result["state"] = "letter_match"
-
-            return result
-        else:
-            attempt += 1
-            result["attempt"] = attempt
-            result["pic"] = get_hangman_pic(attempt)
-
-            if attempt == 6:
-                result["state"] = "lose"
-                result["opened_letters"] = (
-                    word  # Показываем слово целиком при проигрыше
+                return HangmanDTO(
+                    state=HangmanState.win,
+                    word=word,
+                    opened_letters=new_opened_letters,
+                    attempts=attempt,
                 )
-            else:
-                result["state"] = "no_letter_match"
 
-            return result
-    # if word
-    else:
-        if user_attempt == word:
-            result["state"] = "win"
-            result["pic"] = get_hangman_pic(attempt)
+            return HangmanDTO(
+                state=HangmanState.letter_match,
+                word=None,
+                opened_letters=new_opened_letters,
+                attempts=attempt,
+            )
 
-            return result
+        attempt += 1
+        if attempt == 6:
+            return HangmanDTO(
+                state=HangmanState.lose,
+                word=word,
+                opened_letters=word,
+                attempts=attempt,
+            )
 
-        else:
-            attempt += 1
-            result["attempt"] = attempt
-            result["pic"] = get_hangman_pic(attempt)
+        return HangmanDTO(
+            state=HangmanState.no_letter_match,
+            word=None,
+            opened_letters=opened_letters,
+            attempts=attempt,
+        )
 
-            if attempt == 6:
-                result["state"] = "lose"
-                result["opened_letters"] = word
-            else:
-                result["state"] = "no_word_match"
+    if user_attempt == word:
+        return HangmanDTO(
+            state=HangmanState.win,
+            word=word,
+            opened_letters=opened_letters,
+            attempts=attempt,
+        )
 
-            return result
+    attempt += 1
+    if attempt == 6:
+        return HangmanDTO(
+            state=HangmanState.lose,
+            word=word,
+            opened_letters=word,
+            attempts=attempt,
+        )
+
+    return HangmanDTO(
+        state=HangmanState.no_word_match,
+        word=None,
+        opened_letters=opened_letters,
+        attempts=attempt,
+    )
 
 
 class HangmanService:
@@ -156,7 +161,7 @@ class HangmanService:
     def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
 
-    async def start_game(self, chat_id, user_id, difficulty) -> dict:  # type: ignore
+    async def start_game(self, chat_id, user_id, difficulty) -> HangmanDTO:
         async with self.uow:
             await self.uow.gamesession.clear_by_chat_id(chat_id=chat_id)
             if difficulty == "easy":
@@ -165,10 +170,14 @@ class HangmanService:
                 word = await self.uow.hangman.get_random_medium()
             elif difficulty == "hard":
                 word = await self.uow.hangman.get_random_hard()
+            else:
+                raise GameLogicError
+
             if word is None:
                 raise GameLogicError
+
             attempt = 0
-            opened_letters = list("_" * len(word))  # type: ignore
+            opened_letters = "_" * len(word)
             session_info = {
                 "word": word,
                 "attempt": attempt,
@@ -181,46 +190,47 @@ class HangmanService:
                 game_type="hangman",
             )
             await self.uow.gamesession.add(gamesession)
-            res = {
-                "opened_letters": opened_letters,
-                "wordlen": len(word),
-                "pic": get_hangman_pic(0),
-            }
+            result = HangmanDTO(
+                state=None,
+                word=None,
+                opened_letters=opened_letters,
+                attempts=attempt,
+            )
             await self.uow.commit()
-            logging.debug(f"Game started! Session info: {res}")
-            return res
+            logging.debug(f"Game started! Session info: {gamesession.__dict__}")
+            return result
 
-    async def check_state(self, chat_id, user_id, user_attempt):
+    async def check_state(self, chat_id, user_id, user_attempt) -> HangmanDTO:
         async with self.uow:
             gamesesssion = await self.uow.gamesession.get_by_chat_id(chat_id)
             if gamesesssion is None:
                 logging.error("game not found")
                 raise GameNotFound
 
-            res = game_logic(gamesesssion.session_info, user_attempt=user_attempt)
-            if res is None:
-                logging.error(res)
-                raise GameLogicError
-            if res["state"] == "lose" or res["state"] == "win":
+            hangman_info = game_logic(
+                gamesesssion.session_info, user_attempt=user_attempt
+            )
+
+            if hangman_info.state in (HangmanState.lose, HangmanState.win):
                 to_history = GameHistory(
                     chat_id=chat_id,
                     user_id=user_id,
                     game_type="hangman",
-                    game_result=1 if res["state"] == "win" else 0,
+                    game_result=1 if hangman_info.state == HangmanState.win else 0,
                 )
                 await self.uow.gamesession.clear_by_chat_id(chat_id)
                 logging.debug(f" adding game to history: {to_history.__dict__}")
                 await self.uow.gamehistory.add(to_history)
-                logging.debug(f"{res['state']}!!!: {res}")
+                logging.debug(f"{hangman_info}")
                 await self.uow.commit()
-                return res
-            else:
-                gamesesssion.session_info.update(
-                    {
-                        "attempt": res["attempt"],
-                        "opened_letters": res["opened_letters"],
-                    }
-                )
-                await self.uow.commit()
-                logging.debug(f"checking state... Current state: {res}")
-                return res
+                return hangman_info
+
+            gamesesssion.session_info.update(
+                {
+                    "attempt": hangman_info.attempts,
+                    "opened_letters": hangman_info.opened_letters,
+                }
+            )
+            await self.uow.commit()
+            logging.debug(f"checking state... Current state: {hangman_info}")
+            return hangman_info

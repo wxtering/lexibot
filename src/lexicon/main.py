@@ -22,7 +22,7 @@ async def start_bot():
     setup_dispatcher(dp)
     setup_dishka(container=container, router=dp, auto_inject=True)
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
     await bot.delete_webhook(drop_pending_updates=True)

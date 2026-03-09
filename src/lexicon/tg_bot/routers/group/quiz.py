@@ -69,7 +69,7 @@ async def quiz_answer(
     result = await QuizService.check_state(
         user_attempt=answer, chat_id=message.chat.id, user_id=message.from_user.id
     )
-    if result["state"] == "Continue":
+    if result["state"] == "continue":
         pass
     elif result["state"] == "win":
         await UserService.add_user(
