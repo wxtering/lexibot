@@ -1,9 +1,11 @@
+import logging
 from random import choice
 
 from database.models.models import GameHistory, GameSessions
-from entity.exceptions import GameLogicError, GameNotFound
-from entity.uow import UnitOfWork
-from sqlalchemy.sql.functions import user
+from services.entity.exceptions import GameLogicError, GameNotFound
+from services.entity.uow import UnitOfWork
+
+logging = logging.getLogger(__name__)
 
 
 async def get_random_quiz(uow: UnitOfWork) -> tuple[str, str]:
@@ -13,14 +15,13 @@ async def get_random_quiz(uow: UnitOfWork) -> tuple[str, str]:
 
 def game_logic(session_info: dict, user_attempt: str) -> dict:
     word = session_info["word"]
-    answer = user_attempt
 
-    if word == answer:
+    if word == user_attempt:
         res = {"data": {}, "response": {"word": word, "state": "win"}}
         return res
     else:
         attempts = session_info["attempts"] + 1
-
+        logging.debug(f"attempts: {attempts}")
         if (attempts - 3) % 3 == 0:
             hint = list(session_info["hint_letters"])
             closed = [i for i, ch in enumerate(hint) if ch == "_"]
@@ -70,9 +71,9 @@ def game_logic(session_info: dict, user_attempt: str) -> dict:
             return res
 
 
-async def get_hint(game_session) -> str:
-    word = game_session["word"]
-    hint_list = list(game_session["hint_letters"])
+async def get_hint(session_info) -> str:
+    word = session_info["word"]
+    hint_list = list(session_info["hint_letters"])
 
     closed = [i for i, ch in enumerate(hint_list) if ch == "_"]
     if closed:
@@ -85,13 +86,14 @@ async def get_hint(game_session) -> str:
 class QuizService:
     uow: UnitOfWork
 
-    def __init__(self, uow) -> None:
+    def __init__(self, uow: UnitOfWork) -> None:
         self.uow = uow
 
     async def start_quiz(self, chat_id, user_id) -> dict:
         async with self.uow:
             await self.uow.gamesession.clear_by_chat_id(chat_id=chat_id)
             word, definition = await get_random_quiz(self.uow)
+            logging.debug(f"quiz started with word:{word}, definition:{definition}")
             session_info = {
                 "word": word,
                 "definition": definition,
@@ -102,49 +104,55 @@ class QuizService:
                 chat_id=chat_id,
                 user_id=user_id,
                 session_info=session_info,
+                game_type="quiz",
             )
             await self.uow.gamesession.add(gamesession)
             res = {"definition": definition, "wordlen": len(word)}
+            await self.uow.commit()
+            logging.debug("game started successfully")
             return res
 
     async def check_state(self, chat_id, user_attempt, user_id) -> dict:
         async with self.uow:
             game_session = await self.uow.gamesession.get_by_chat_id(chat_id=chat_id)
+            logging.debug(f"session_info: {game_session.session_info}")
             if not game_session:
                 raise GameNotFound()
 
             info = game_logic(game_session.session_info, user_attempt)
+            logging.debug(f"check game_logic result: {info}")
             if info["response"]["state"] == "win":
                 to_history = GameHistory(
                     chat_id=chat_id,
                     user_id=user_id,
-                    game_type="hangman",
-                    result=1,
+                    game_type="quiz",
+                    game_result=1,
                 )
                 await self.uow.gamehistory.add(to_history)
                 await self.uow.gamesession.clear_by_chat_id(chat_id=chat_id)
-
+                await self.uow.commit()
                 return info["response"]
             elif info["response"]["state"] == "continue":
                 game_session.session_info.update(
                     {
                         "attempts": info["data"]["attempts"],
-                        "hint_letters": info["data"]["hint_letters"],
                     }
                 )
+                await self.uow.commit()
+                logging.debug(f"continue section {info['data']}")
                 return info["response"]
             elif info["response"]["state"] == "hint":
+                game_session.session_info.update(
+                    {
+                        "hint_letters": info["data"]["hint_letters"],
+                        "attempts": info["data"]["attempts"],
+                    }
+                )
+                logging.debug("hint section")
+                await self.uow.commit()
                 return info["response"]
             elif info["response"]["state"] == "lose":
                 await self.uow.gamesession.clear_by_chat_id(chat_id=chat_id)
-                to_history = GameHistory(
-                    chat_id=chat_id,
-                    user_id=user_id,
-                    game_type="hangman",
-                    result=0,
-                )
-                await self.uow.gamehistory.add(to_history)
-                await self.uow.gamesession.clear_by_chat_id(chat_id)
                 await self.uow.commit()
                 return info["response"]
             else:
@@ -156,7 +164,12 @@ class QuizService:
             if not game_session:
                 raise GameNotFound()
 
-            hint = await get_hint(game_session)
+            hint = await get_hint(game_session.session_info)
             game_session.session_info.update({"hint_letters": hint})
             await self.uow.commit()
             return hint
+
+    async def quit_game(self, chat_id: int) -> None:
+        async with self.uow:
+            await self.uow.gamesession.clear_by_chat_id(chat_id=chat_id)
+            await self.uow.commit()

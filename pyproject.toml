@@ -8,8 +8,14 @@ dependencies = [
     "aiogram>=3.25.0",
     "alembic>=1.18.4",
     "asyncio>=4.0.0",
+    "asyncpg>=0.31.0",
     "dishka>=1.8.0",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.13.1",
     "sqlalchemy>=2.0.47",
+]
+
+[tool.uv.workspace]
+members = [
+    "venv",
 ]

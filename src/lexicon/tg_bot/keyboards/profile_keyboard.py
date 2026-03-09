@@ -1,5 +1,5 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from callbacks.stats import (
+from tg_bot.callbacks.stats import (
     LeaderboardGameTypeStatsCallback,
     UserGameTypeStatsCallback,
 )

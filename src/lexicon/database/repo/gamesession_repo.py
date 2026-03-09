@@ -1,6 +1,6 @@
 from database.models.models import GameSessions
-from database.session import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.expression import delete
 
 

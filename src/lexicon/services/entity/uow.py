@@ -33,9 +33,10 @@ class UnitOfWork:
         finally:
             await self.session.close()
 
-    async def commit(self) -> None:
-        await self.session.commit()
-
     async def rollback(self) -> None:
         if self.session:
             await self.session.rollback()
+
+    async def commit(self) -> None:
+        if self.session:
+            await self.session.commit()

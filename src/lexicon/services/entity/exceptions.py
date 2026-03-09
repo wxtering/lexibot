@@ -4,3 +4,7 @@ class GameNotFound(Exception):
 
 class GameLogicError(Exception):
     pass
+
+
+class DbError(Exception):
+    pass

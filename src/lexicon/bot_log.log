@@ -1,0 +1,5 @@
+2026-03-09 02:23:00,475 - INFO - aiogram.dispatcher - Start polling
+2026-03-09 02:23:00,572 - INFO - aiogram.dispatcher - Run polling for bot @LexiconGames_bot id=8318107590 - 'Lexicon'
+2026-03-09 02:23:24,868 - WARNING - aiogram.dispatcher - Received SIGINT signal
+2026-03-09 02:23:24,869 - INFO - aiogram.dispatcher - Polling stopped for bot @LexiconGames_bot id=8318107590 - 'Lexicon'
+2026-03-09 02:23:24,869 - INFO - aiogram.dispatcher - Polling stopped

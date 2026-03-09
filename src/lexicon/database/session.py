@@ -1,9 +1,8 @@
-from configuration.cfg import get_database_config
+from configuration.cfg import DatabaseConfig
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-dbconfig = get_database_config()
-
+dbconfig = DatabaseConfig()
 
 engine = create_async_engine(dbconfig.db_url, echo=dbconfig.db_echo)
 

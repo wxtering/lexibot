@@ -16,14 +16,6 @@ class BotConfig(ConfigBase):
     bot_token: SecretStr
 
 
-def get_bot_config() -> BotConfig:
-    return BotConfig()  # type:ignore
-
-
 class DatabaseConfig(ConfigBase):
     db_url: str
-    db_echo: bool = False
-
-
-def get_database_config() -> DatabaseConfig:
-    return DatabaseConfig()  # type:ignore
+    db_echo: bool

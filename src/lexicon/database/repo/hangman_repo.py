@@ -1,8 +1,9 @@
 from random import randint
 
-from database.models.models import HangmanWords
-from database.session import AsyncSession
 from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio.session import AsyncSession
+
+from database.models.models import HangmanWords
 
 
 class HangmanRepo:

@@ -1,5 +1,6 @@
+from sqlalchemy.ext.asyncio.session import AsyncSession
+
 from database.models.models import GameHistory
-from database.session import AsyncSession
 
 
 class GameHistoryRepo:

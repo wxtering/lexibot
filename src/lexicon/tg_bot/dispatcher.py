@@ -1,5 +1,5 @@
 from aiogram import Dispatcher
-from routers import routers
+from tg_bot.routers import routers
 
 
 def setup_dispatcher(dp: Dispatcher):
