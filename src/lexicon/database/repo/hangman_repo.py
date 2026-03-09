@@ -3,7 +3,7 @@ from random import randint
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from database.models.models import HangmanWords
+from src.lexicon.database.models.models import HangmanWords
 
 
 class HangmanRepo:

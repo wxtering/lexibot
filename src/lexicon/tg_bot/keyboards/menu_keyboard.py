@@ -1,5 +1,6 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from tg_bot.callbacks.hangman import HangmanStartCallback
+
+from src.lexicon.tg_bot.callbacks.hangman import HangmanStartCallback
 
 
 def get_menu_keyboard():

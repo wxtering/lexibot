@@ -1,5 +1,6 @@
 from aiogram import Dispatcher
-from tg_bot.routers import routers
+
+from src.lexicon.tg_bot.routers import routers
 
 
 def setup_dispatcher(dp: Dispatcher):

@@ -1,6 +1,6 @@
 import logging
 
-from services.entity.uow import UnitOfWork
+from src.lexicon.services.entity.uow import UnitOfWork
 
 logging = logging.getLogger(__name__)
 

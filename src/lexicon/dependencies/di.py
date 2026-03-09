@@ -1,12 +1,13 @@
-from configuration.cfg import BotConfig, DatabaseConfig
-from database.session import DEFAULT_SESSION_FACTORY
 from dishka import Provider, Scope, make_async_container, provide, provide_all
-from services.entity.uow import UnitOfWork
-from services.logic.games.hangman import HangmanService
-from services.logic.games.quiz import QuizService
-from services.logic.stats.stats import StatsService
-from services.logic.user import UserService
 from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from src.lexicon.configuration.cfg import BotConfig, DatabaseConfig
+from src.lexicon.database.session import DEFAULT_SESSION_FACTORY
+from src.lexicon.services.entity.uow import UnitOfWork
+from src.lexicon.services.logic.games.hangman import HangmanService
+from src.lexicon.services.logic.games.quiz import QuizService
+from src.lexicon.services.logic.stats.stats import StatsService
+from src.lexicon.services.logic.user import UserService
 
 
 class AsyncSessionProvider(Provider):

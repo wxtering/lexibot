@@ -1,15 +1,16 @@
 import logging
 
-import tg_bot.keyboards.profile_keyboard as pkb
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 from dishka.integrations.aiogram import FromDishka
-from services.logic.stats.stats import StatsService
-from tg_bot.callbacks.stats import (
+
+import src.lexicon.tg_bot.keyboards.profile_keyboard as pkb
+from src.lexicon.services.logic.stats.stats import StatsService
+from src.lexicon.tg_bot.callbacks.stats import (
     LeaderboardGameTypeStatsCallback,
     UserGameTypeStatsCallback,
 )
-from tg_bot.middlewares.private import PrivateChatMiddleware
+from src.lexicon.tg_bot.middlewares.private import PrivateChatMiddleware
 
 logging = logging.getLogger(__name__)
 router = Router()

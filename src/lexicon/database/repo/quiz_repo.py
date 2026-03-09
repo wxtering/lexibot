@@ -1,7 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from database.models.models import QuizQuestions
+from src.lexicon.database.models.models import QuizQuestions
 
 
 class QuizRepo:

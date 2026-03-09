@@ -1,6 +1,7 @@
-from database.models.models import GameHistory, UserData
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio.session import AsyncSession
+
+from src.lexicon.database.models.models import GameHistory, UserData
 
 
 class StatsRepo:

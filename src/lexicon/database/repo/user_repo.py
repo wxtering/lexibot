@@ -1,6 +1,7 @@
-from database.models.models import UserData
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio.session import AsyncSession
+
+from src.lexicon.database.models.models import UserData
 
 
 class UserRepo:
@@ -8,7 +9,6 @@ class UserRepo:
         self.session = session
 
     async def add_user(self, user: UserData) -> None:
-        print(user.__dict__)
         stmt = (
             insert(UserData)
             .values(tg_id=user.tg_id, username=user.username)

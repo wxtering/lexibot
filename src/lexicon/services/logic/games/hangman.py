@@ -2,9 +2,10 @@ import logging
 from re import finditer
 
 from aiogram.types import game
-from database.models.models import GameHistory, GameSessions
-from services.entity.exceptions import GameLogicError, GameNotFound
-from services.entity.uow import UnitOfWork
+
+from src.lexicon.database.models.models import GameHistory, GameSessions
+from src.lexicon.services.entity.exceptions import GameLogicError, GameNotFound
+from src.lexicon.services.entity.uow import UnitOfWork
 
 logging = logging.getLogger(__name__)
 

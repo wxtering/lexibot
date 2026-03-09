@@ -4,9 +4,10 @@ from aiogram import F, Router
 from aiogram.filters import Command, StateFilter
 from aiogram.types import CallbackQuery, Message
 from dishka.integrations.aiogram import FromDishka
-from services.logic.user import UserService
-from tg_bot.keyboards import menu_keyboard as mk
-from tg_bot.middlewares.private import PrivateChatMiddleware
+
+from src.lexicon.services.logic.user import UserService
+from src.lexicon.tg_bot.keyboards import menu_keyboard as mk
+from src.lexicon.tg_bot.middlewares.private import PrivateChatMiddleware
 
 logging = logging.getLogger(__name__)
 router = Router()

@@ -4,10 +4,11 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.strategy import FSMStrategy
-from configuration.cfg import BotConfig
-from dependencies.di import container
 from dishka.integrations.aiogram import setup_dishka
-from tg_bot.dispatcher import setup_dispatcher
+
+from src.lexicon.configuration.cfg import BotConfig
+from src.lexicon.dependencies.di import container
+from src.lexicon.tg_bot.dispatcher import setup_dispatcher
 
 
 async def start_bot():

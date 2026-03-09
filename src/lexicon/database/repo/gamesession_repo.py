@@ -1,7 +1,8 @@
-from database.models.models import GameSessions
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from sqlalchemy.sql.expression import delete
+
+from src.lexicon.database.models.models import GameSessions
 
 
 class GameSessionRepo:

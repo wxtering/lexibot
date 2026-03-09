@@ -3,10 +3,11 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from dishka.integrations.aiogram import FromDishka
-from services.logic.games.quiz import QuizService
-from services.logic.user import UserService
-from tg_bot.middlewares.chat import GroupChatMiddleware
-from tg_bot.states.quiz import QuizState
+
+from src.lexicon.services.logic.games.quiz import QuizService
+from src.lexicon.services.logic.user import UserService
+from src.lexicon.tg_bot.middlewares.chat import GroupChatMiddleware
+from src.lexicon.tg_bot.states.quiz import QuizState
 
 router = Router()
 router.message.middleware(GroupChatMiddleware())

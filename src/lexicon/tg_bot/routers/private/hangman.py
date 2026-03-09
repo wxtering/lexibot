@@ -5,12 +5,13 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from dishka.integrations.aiogram import FromDishka
-from services.logic.games.hangman import HangmanService
-from services.logic.user import UserService
-from tg_bot.callbacks.hangman import HangmanStartCallback
-from tg_bot.keyboards import menu_keyboard as mk
-from tg_bot.middlewares.private import PrivateChatMiddleware
-from tg_bot.states.hangman import HangmanState
+
+from src.lexicon.services.logic.games.hangman import HangmanService
+from src.lexicon.services.logic.user import UserService
+from src.lexicon.tg_bot.callbacks.hangman import HangmanStartCallback
+from src.lexicon.tg_bot.keyboards import menu_keyboard as mk
+from src.lexicon.tg_bot.middlewares.private import PrivateChatMiddleware
+from src.lexicon.tg_bot.states.hangman import HangmanState
 
 logging = logging.getLogger(__name__)
 router = Router()

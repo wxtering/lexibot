@@ -1,12 +1,12 @@
 from typing import Self
 
-from database.repo.gamehistory_repo import GameHistoryRepo
-from database.repo.gamesession_repo import GameSessionRepo
-from database.repo.hangman_repo import HangmanRepo
-from database.repo.quiz_repo import QuizRepo
-from database.repo.stats_repo import StatsRepo
-from database.repo.user_repo import UserRepo
-from database.session import DEFAULT_SESSION_FACTORY
+from src.lexicon.database.repo.gamehistory_repo import GameHistoryRepo
+from src.lexicon.database.repo.gamesession_repo import GameSessionRepo
+from src.lexicon.database.repo.hangman_repo import HangmanRepo
+from src.lexicon.database.repo.quiz_repo import QuizRepo
+from src.lexicon.database.repo.stats_repo import StatsRepo
+from src.lexicon.database.repo.user_repo import UserRepo
+from src.lexicon.database.session import DEFAULT_SESSION_FACTORY
 
 
 class UnitOfWork:
