@@ -30,8 +30,8 @@ class StatsService:
                 for user in row_leaderboard:
                     username = user.get("username", "anon")
                     wins = user.get("wins", 0)
-                    loses = user.get("loses", 0)
-                    total = wins + loses
+                    total = user.get("total_games", 0)
+                    loses = total - wins
                     wr = int(wins / total * 100) if total else 0
                     leaderboard_list.append(
                         LeaderboardEntity(
