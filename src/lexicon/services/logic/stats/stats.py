@@ -10,10 +10,6 @@ from src.lexicon.services.entity.uow import UnitOfWork
 logging = logging.getLogger(__name__)
 
 
-def get_leaderboard_stats():
-    pass
-
-
 class StatsService:
     uow: UnitOfWork
 
@@ -48,7 +44,7 @@ class StatsService:
         async with self.uow:
             user_stats = await self.uow.stats.get_user_stats(user_id, game_type)
             if not user_stats:
-                return UserStatsDTO(game_type=game_type, has_games=True)
+                return UserStatsDTO(game_type=game_type, has_games=False)
 
             else:
                 wins = user_stats.get(True, 0)
