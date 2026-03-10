@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery
 from dishka.integrations.aiogram import FromDishka
 
 import src.lexicon.tg_bot.keyboards.profile_keyboard as pkb
+from src.lexicon.services.dto.leaderboard import LeaderboardDTO, LeaderboardEntity
 from src.lexicon.services.logic.stats.stats import StatsService
 from src.lexicon.tg_bot.callbacks.stats import (
     LeaderboardGameTypeStatsCallback,
@@ -52,10 +53,10 @@ async def user_stats(
     callback_data: UserGameTypeStatsCallback,
     StatsService: FromDishka[StatsService],
 ):
-    stats = await StatsService.get_user_stats(
+    user_stats = await StatsService.get_user_stats(
         callback.from_user.id, callback_data.game_type
     )
-    if not stats["has_games"]:
+    if not user_stats.has_games:
         await callback.message.edit_text(
             text="📊 У вас пока нет игр в этой категории",
             reply_markup=pkb.back_to_menu_button(),
@@ -64,10 +65,10 @@ async def user_stats(
     else:
         await callback.message.edit_text(
             text=f"📈 Статистика: {callback_data.game_type}\n\n"
-            f"Всего игр: {stats['total']}\n"
-            f"Побед: {stats['wins']}\n"
-            f"Поражений {stats['loses']}\n"
-            f"Процент побед: {int(stats['wr'])}%",
+            f"Всего игр: {user_stats.total}\n"
+            f"Побед: {user_stats.wins}\n"
+            f"Поражений {user_stats.loses}\n"
+            f"Процент побед: {(user_stats.wr)}%",
             reply_markup=pkb.back_to_menu_button(),
         )
         await callback.answer()
@@ -80,7 +81,7 @@ async def leaderboard_stats(
     StatsService: FromDishka[StatsService],
 ):
     leaderboard = await StatsService.get_leaderboard(callback_data.game_type)
-    if not leaderboard["has_games"]:
+    if not leaderboard.has_games:
         await callback.message.edit_text(
             text="📊 Пока нет игр в этой категории",
             reply_markup=pkb.back_to_menu_button(),
@@ -90,8 +91,8 @@ async def leaderboard_stats(
     else:
         leaderboard_output = "\n".join(
             [
-                f"{leader['username']}\n wins: {leader['wins']}\n loses: {leader['loses']}\n total games: {leader['total']}\n wr: {leader['wr']}%"
-                for leader in leaderboard["leaders"]
+                f"{leader.username}\n wins: {leader.wins}\n loses: {leader.loses}\n total games: {leader.total}\n wr: {leader.wr}%"
+                for leader in leaderboard.leaders
             ]
         )
         await callback.message.edit_text(

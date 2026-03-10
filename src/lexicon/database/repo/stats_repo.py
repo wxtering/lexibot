@@ -18,6 +18,7 @@ class StatsRepo:
             .group_by(GameHistory.game_result)
         )
         result = await self.session.execute(stmt)
+
         in_dict = {res: value for res, value in result.all()}
 
         return in_dict
