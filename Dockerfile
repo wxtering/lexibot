@@ -10,8 +10,6 @@ uv sync \
   --frozen
 EOF
 COPY . .
-
-RUN chmod +x start_scripts/prestart.sh
 ENTRYPOINT [ "start_scripts/prestart.sh"]
 
 CMD [ "uv", "run", "python", "start.py" ]
