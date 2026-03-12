@@ -1,7 +1,6 @@
 from dishka import Provider, Scope, make_async_container, provide, provide_all
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from src.lexicon.configuration.cfg import BotConfig, DatabaseConfig
 from src.lexicon.database.session import DEFAULT_SESSION_FACTORY
 from src.lexicon.services.entity.uow import UnitOfWork
 from src.lexicon.services.logic.games.hangman import HangmanService

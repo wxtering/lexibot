@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.strategy import FSMStrategy
 from dishka.integrations.aiogram import setup_dishka
 
-from src.lexicon.configuration.cfg import BotConfig
+from cfg import BotConfig
 from src.lexicon.dependencies.di import container
 from src.lexicon.tg_bot.dispatcher import setup_dispatcher
 

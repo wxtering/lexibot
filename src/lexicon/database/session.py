@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from src.lexicon.configuration.cfg import DatabaseConfig
+from cfg import DatabaseConfig
 
 dbconfig = DatabaseConfig()
 
